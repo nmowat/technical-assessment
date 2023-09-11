@@ -29,16 +29,13 @@ class FloodReportForm extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    // Get the list of stations from the service.
-    $stations = $this->floodReportService->getStations();
-    // TODO: Parse response.
-    $options = [];
-
+    // Get select options of the stations from the service.
+    $options = $this->floodReportService->getStations();
 
     // Add the select options to the form.
     $form['station'] = [
       '#type' => 'select',
-      '#title' => $this->t('Select a Flood Report station'),
+      '#title' => $this->t('Select a Flood Report station:'),
       '#options' => $options,
       ];
 

@@ -2,7 +2,10 @@
 
 namespace Drupal\flood_report;
 
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class FloodReportService {
 
@@ -24,47 +27,61 @@ class FloodReportService {
   }
 
   /**
-   * Make an API request and return the JSON response as an array.
-   *
-   * @param string $url
-   *   The URL of the API endpoint.
-   *
-   * @return array|null
-   *   The parsed JSON response as an array.
-   */
-  public function makeApiRequestJson($url) {
-    try {
-      $response = $this->httpClient->request('GET', $url);
-      $data = json_decode($response->getBody()->getContents(), TRUE);
-
-      return $data;
-    }
-    catch (\Exception $e) {
-      // Handle exceptions here.
-      return NULL;
-    }
-  }
-
-  /**
    * Retrieve list of Stations.
    *
    * @return mixed
+   * @throws GuzzleException
    */
   public function getStations() {
     // Fetch stations from the API.
+    $options = [];
     $url = 'https://environment.data.gov.uk/flood-monitoring/id/stations?_limit=50';
-    return $this->httpClient->makeApiRequestJson($url);
+
+    try {
+      $response = $this->httpClient->request('GET', $url);
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+    }
+    catch (Exception $exception) {
+      // TODO: handle exception.
+    }
+    if ($data) {
+      foreach($data['items'] as $key => $value) {
+        if (!empty($value['catchmentName'])) {
+          $options[$key] = $value['catchmentName'];
+        }
+      }
+    }
+    return $options;
   }
 
   /**
    * Retrieve information for a selected Station.
    * @param $id
    * @return mixed
+   * @throws GuzzleException
    */
   public function getStation($id) {
     // Implement logic to fetch station readings from the API.
     $url = "https://environment.data.gov.uk/flood-monitoring/id/stations/' . $id . '/readings?_sorted&_limit=10";
-    return $this->httpClient->makeApiRequestJson($url);
+
+    try {
+      $response = $this->httpClient->request('GET', $url);
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+    }
+    catch (Exception $exception) {
+      // TODO: handle exception.
+    }
+    if ($data) {
+
+      var_dump($data);
+
+      foreach($data['items'] as $key => $value) {
+        if (!empty($value['catchmentName'])) {
+          $options[$key] = $value['catchmentName'];
+        }
+      }
+    }
+    return $options;
   }
 
 }
