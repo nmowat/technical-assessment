@@ -1,0 +1,6 @@
+name: 'Flood Report'
+type: module
+description: 'Provides flood report functionality.'
+core_version_requirement: ^8 || ^9
+package: Custom
+version: 1.0

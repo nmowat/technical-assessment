@@ -1,0 +1,15 @@
+flood_report.form:
+  path: '/flood-report'
+  defaults:
+    _form: '\Drupal\flood_report\Form\FloodReportForm'
+    _title: 'Flood Report'
+  requirements:
+    _permission: 'access content'
+
+flood_report.controller:
+  path: '/flood-report/{id}'
+  defaults:
+    _controller: '\Drupal\flood_report\Controller\FloodReportController'
+    _title: 'Flood Report results'
+  requirements:
+    _permission: 'access content'
