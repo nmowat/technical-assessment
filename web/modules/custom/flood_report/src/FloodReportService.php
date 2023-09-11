@@ -5,7 +5,6 @@ namespace Drupal\flood_report;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class FloodReportService {
 
@@ -40,13 +39,14 @@ class FloodReportService {
     try {
       $response = $this->httpClient->request('GET', $url);
       $data = json_decode($response->getBody()->getContents(), TRUE);
-    }
-    catch (Exception $exception) {
+    } catch (Exception $exception) {
       // TODO: handle exception.
     }
     if ($data) {
-      foreach($data['items'] as $key => $value) {
+      foreach ($data['items'] as $key => $value) {
         if (!empty($value['catchmentName'])) {
+          $array = explode('/', $value['@id']);
+          $key = end($array);
           $options[$key] = $value['catchmentName'];
         }
       }
@@ -61,27 +61,27 @@ class FloodReportService {
    * @throws GuzzleException
    */
   public function getStation($id) {
-    // Implement logic to fetch station readings from the API.
-    $url = "https://environment.data.gov.uk/flood-monitoring/id/stations/' . $id . '/readings?_sorted&_limit=10";
+    // Fetch the results for a specific station from the API via its ID.
+    $url = 'https://environment.data.gov.uk/flood-monitoring/id/stations/' . $id . '/readings?_sorted&_limit=10';
+    $output = [];
 
     try {
       $response = $this->httpClient->request('GET', $url);
       $data = json_decode($response->getBody()->getContents(), TRUE);
-    }
-    catch (Exception $exception) {
+    } catch (Exception $exception) {
       // TODO: handle exception.
     }
     if ($data) {
-
-      var_dump($data);
-
-      foreach($data['items'] as $key => $value) {
-        if (!empty($value['catchmentName'])) {
-          $options[$key] = $value['catchmentName'];
+      foreach ($data['items'] as $key => $item) {
+        if (!empty($item['dateTime']) && !empty($item['value'])) {
+          $output[$key]['dateTime'] = $item['dateTime'];
+          $output[$key]['measure'] = number_format((float)$item['value'], 3, '.', '');;
         }
+
       }
+      json_encode($output);
     }
-    return $options;
+    return $output;
   }
 
 }

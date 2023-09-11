@@ -2,7 +2,6 @@
 
 namespace Drupal\flood_report\Controller;
 
-use GuzzleHttp\Psr7\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\flood_report\FloodReportService;
@@ -11,18 +10,32 @@ class FloodReportController extends ControllerBase {
 
   protected $floodReportService;
 
+  /**
+   * FloodReportController constructor.
+   *
+   * @param \Drupal\flood_report\FloodReportService $floodReportService
+   */
   public function __construct(FloodReportService $floodReportService) {
     $this->floodReportService = $floodReportService;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('flood_report.station_service')
     );
   }
 
-  public function redirectToStationEndpoint($id) {
-    // Return response with the selected station ID.
-    return new Response('Selected station ID: ' . $id);
+  /**
+   * Fetch results from a selected station.
+   */
+  public function getStationResults($id) {
+
+    $output = $this->floodReportService->getStation($id);
+    return ($output);
+
   }
+
 }

@@ -37,7 +37,7 @@ class FloodReportForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Select a Flood Report station:'),
       '#options' => $options,
-      ];
+    ];
 
     // Add a submit button to the form.
     $form['submit'] = [
@@ -50,11 +50,11 @@ class FloodReportForm extends FormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Get the selected station ID from the submitted form values.
+    // TODO - error caused here
     $selectedStationId = $form_state->getValue('station');
-
-    // Redirect to the endpoint with the selected station ID.
-    $url = Url::fromRoute('flood_report.station_controller', ['id' => $selectedStationId]);
-    $response = new TrustedRedirectResponse($url->toString());
-    $response->send();
+    $form_state->setRedirect('flood_report.controller', [
+      'id' => $selectedStationId,
+    ]);
   }
+
 }

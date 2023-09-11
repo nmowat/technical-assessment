@@ -9,7 +9,7 @@ flood_report.form:
 flood_report.controller:
   path: '/flood-report/{id}'
   defaults:
-    _controller: '\Drupal\flood_report\Controller\FloodReportController'
+    _controller: '\Drupal\flood_report\Controller\FloodReportController::getStationResults'
     _title: 'Flood Report results'
   requirements:
     _permission: 'access content'
