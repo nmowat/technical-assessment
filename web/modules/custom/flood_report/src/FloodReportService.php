@@ -61,6 +61,7 @@ class FloodReportService {
 
   /**
    * Retrieve information for a selected Station.
+   *
    * @param $id
    * @return array
    * @throws GuzzleException
@@ -82,7 +83,9 @@ class FloodReportService {
       foreach ($data['items'] as $key => $item) {
         // Extract output where we have both required values.
         if (!empty($item['dateTime']) && !empty($item['value'])) {
-          $output[$key]['dateTime'] = $item['dateTime'];
+          // Convert date to user-friendly format.
+          $date = date('d M Y G:i', strtotime($item['dateTime']));
+          $output[$key]['dateTime'] = $date;
           $output[$key]['value'] = number_format((float)$item['value'], 3, '.', '');
         }
 

@@ -2,6 +2,8 @@
 
 namespace Drupal\flood_report\Controller;
 
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Controller\ControllerBase;
@@ -41,7 +43,7 @@ class FloodReportController extends ControllerBase {
     if ($json_data) {
       $header = [
         'col1' => t('Date & Time'),
-        'col2' => t('Value'),
+        'col2' => t('Water height (metres)'),
       ];
       foreach ($json_data as $item) {
         $rows[] = [
@@ -50,11 +52,23 @@ class FloodReportController extends ControllerBase {
       }
     }
 
+    // Backlink to search.
+    $url = Url::fromUri('base:/flood-report');
+    $url->setOption('attributes', ['class' => ['btn-primary btn']]);
+    $link = Link::fromTextAndUrl(t('Search again'), $url)->toString();
+
+    // Return results in table, and append the backlink.
     if ($rows) {
       return [
+        'table' => [
         '#type' => 'table',
         '#header' => $header,
         '#rows' => $rows,
+          ],
+        'back-link' => [
+          '#type' => 'markup',
+          '#markup' =>  $link,
+        ],
       ];
     }
     else {
