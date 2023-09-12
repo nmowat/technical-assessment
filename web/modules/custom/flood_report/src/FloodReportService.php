@@ -13,13 +13,12 @@ class FloodReportService {
    *
    * @var \GuzzleHttp\Client
    */
-  protected $httpClient;
+  protected Client $httpClient;
 
   /**
    * Constructor for FloodReportService.
    *
-   * @param \GuzzleHttp\Client $http_client
-   *   A Guzzle client object.
+   * @param Client $httpClient
    */
   public function __construct(Client $httpClient) {
     $this->httpClient = $httpClient;
@@ -28,28 +27,34 @@ class FloodReportService {
   /**
    * Retrieve list of Stations.
    *
-   * @return mixed
+   * @return array
    * @throws GuzzleException
    */
-  public function getStations() {
+  public function getStations(): array {
     // Fetch stations from the API.
-    $options = [];
+    $options = $data = [];
     $url = 'https://environment.data.gov.uk/flood-monitoring/id/stations?_limit=50';
 
     try {
       $response = $this->httpClient->request('GET', $url);
       $data = json_decode($response->getBody()->getContents(), TRUE);
-    } catch (Exception $exception) {
-      // TODO: handle exception.
     }
+    catch (Exception $e) {
+      \Drupal::logger('flood_report_getStations')->error($e->getMessage());
+    }
+
     if ($data) {
-      foreach ($data['items'] as $key => $value) {
-        if (!empty($value['catchmentName'])) {
-          $array = explode('/', $value['@id']);
+      foreach ($data['items'] as $item) {
+        if (!empty($item['label'])) {
+          // Key the options by the individual id.
+          $array = explode('/', $item['@id']);
           $key = end($array);
-          $options[$key] = $value['catchmentName'];
+          // Ensure consistent formatting of station names.
+          $options[$key] = ucwords(strtolower($item['label']));
         }
       }
+      // Alphabetically sort the options.
+      asort($options);
     }
     return $options;
   }
@@ -57,30 +62,34 @@ class FloodReportService {
   /**
    * Retrieve information for a selected Station.
    * @param $id
-   * @return mixed
+   * @return array
    * @throws GuzzleException
    */
-  public function getStation($id) {
+  public function getStation($id): array {
     // Fetch the results for a specific station from the API via its ID.
     $url = 'https://environment.data.gov.uk/flood-monitoring/id/stations/' . $id . '/readings?_sorted&_limit=10';
-    $output = [];
+    $output = $data = [];
 
     try {
       $response = $this->httpClient->request('GET', $url);
       $data = json_decode($response->getBody()->getContents(), TRUE);
-    } catch (Exception $exception) {
-      // TODO: handle exception.
     }
+    catch (Exception $e) {
+        \Drupal::logger('flood_report_getStation')->error($e->getMessage());
+    }
+
     if ($data) {
       foreach ($data['items'] as $key => $item) {
+        // Extract output where we have both required values.
         if (!empty($item['dateTime']) && !empty($item['value'])) {
           $output[$key]['dateTime'] = $item['dateTime'];
-          $output[$key]['measure'] = number_format((float)$item['value'], 3, '.', '');;
+          $output[$key]['value'] = number_format((float)$item['value'], 3, '.', '');
         }
 
       }
       json_encode($output);
     }
+
     return $output;
   }
 

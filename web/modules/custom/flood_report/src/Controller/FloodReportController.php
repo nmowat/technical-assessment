@@ -2,18 +2,19 @@
 
 namespace Drupal\flood_report\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\flood_report\FloodReportService;
 
 class FloodReportController extends ControllerBase {
 
-  protected $floodReportService;
+  protected FloodReportService $floodReportService;
 
   /**
    * FloodReportController constructor.
    *
-   * @param \Drupal\flood_report\FloodReportService $floodReportService
+   * @param FloodReportService $floodReportService
    */
   public function __construct(FloodReportService $floodReportService) {
     $this->floodReportService = $floodReportService;
@@ -22,19 +23,46 @@ class FloodReportController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): FloodReportController|static {
     return new static(
       $container->get('flood_report.station_service')
     );
   }
 
   /**
-   * Fetch results from a selected station.
+   * Retrieve results for a selected station, output as a render array table.
+   *
+   * @throws GuzzleException
    */
-  public function getStationResults($id) {
+  public function getStationResults($id): array {
 
-    $output = $this->floodReportService->getStation($id);
-    return ($output);
+    $json_data = $this->floodReportService->getStation($id);
+    $header = $rows = [];
+    if ($json_data) {
+      $header = [
+        'col1' => t('Date & Time'),
+        'col2' => t('Value'),
+      ];
+      foreach ($json_data as $item) {
+        $rows[] = [
+          $item['dateTime'], $item['value']
+        ];
+      }
+    }
+
+    if ($rows) {
+      return [
+        '#type' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+      ];
+    }
+    else {
+      return [
+        '#type' => 'markup',
+        '#markup' => '<p>' . t('No information available at the moment') . '</p>',
+      ];
+    }
 
   }
 
