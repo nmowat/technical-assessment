@@ -1,0 +1,4 @@
+services:
+  flood_report.station_service:
+    class: Drupal\flood_report\FloodReportService
+    arguments: ['@http_client']

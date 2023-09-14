@@ -1,0 +1,14 @@
+uuid: fabb185c-0d10-4339-9487-b3afbae6fb6e
+langcode: en-gb
+status: true
+dependencies:
+  config:
+    - user.role.administrator
+  module:
+    - user
+id: user_add_role_action.administrator
+label: 'Add the Administrator role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: administrator
